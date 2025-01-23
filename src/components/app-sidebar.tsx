@@ -61,7 +61,7 @@ const items = [
   },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDetails: any, otherUsers: any}) {
   return (
     <Sidebar>
       <SidebarContent>
@@ -69,12 +69,12 @@ export function AppSidebar() {
           <SidebarGroupLabel>People</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {otherUsers.map((item) => (
+                <SidebarMenuItem key={item.id} onClick={() => setSelectedUser(item.id)}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                      {/* <item.icon /> */}
+                      <span>{item.username}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

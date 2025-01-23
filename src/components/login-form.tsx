@@ -13,9 +13,60 @@ import { Label } from "@/components/ui/label";
 
 export function LoginForm({
   className,
+ // Callback to handle successful login
+  onAuthSuccess,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(""); // Clear previous errors
+
+    const endpoint = isSignUp
+      ? "http://localhost:1337/api/auth/local/register"
+      : "http://localhost:1337/api/auth/local";
+
+    const payload = isSignUp
+      ? { username: formData.name, email: formData.email, password: formData.password }
+      : { identifier: formData.email, password: formData.password };
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || "Something went wrong");
+      }
+
+      const data = await response.json();
+      console.log("Success:", data);
+
+      // Handle successful authentication
+      if (onAuthSuccess) {
+        onAuthSuccess(data);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -31,7 +82,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               {isSignUp && (
                 <div className="grid gap-2">
@@ -40,6 +91,8 @@ export function LoginForm({
                     id="name"
                     type="text"
                     placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -50,6 +103,8 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -65,21 +120,23 @@ export function LoginForm({
                     </a>
                   )}
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <Button type="submit" className="w-full">
                 {isSignUp ? "Sign Up" : "Login"}
               </Button>
-              {/* {!isSignUp && (
-                <Button variant="outline" className="w-full">
-                  Login with Google
-                </Button>
-              )} */}
+              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
             </div>
             <div className="mt-4 text-center text-sm">
               {isSignUp
                 ? "Already have an account? "
-                : "Don&apos;t have an account? "}
+                : "Don't have an account? "}
               <a
                 href="#"
                 className="underline underline-offset-4"

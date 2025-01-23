@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "messages",
+  "info": {
+    "singularName": "message",
+    "pluralName": "messages",
+    "displayName": "Message",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Content": {
+      "type": "blocks"
+    },
+    "senders": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "sends"
+    },
+    "convs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::conversation.conversation",
+      "inversedBy": "messages"
+    }
+  }
+}
