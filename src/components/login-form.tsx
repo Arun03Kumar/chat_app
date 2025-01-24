@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 
 export function LoginForm({
   className,
- // Callback to handle successful login
   onAuthSuccess,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -32,14 +31,18 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError(""); 
 
     const endpoint = isSignUp
       ? "http://localhost:1337/api/auth/local/register"
       : "http://localhost:1337/api/auth/local";
 
     const payload = isSignUp
-      ? { username: formData.name, email: formData.email, password: formData.password }
+      ? {
+          username: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }
       : { identifier: formData.email, password: formData.password };
 
     try {
@@ -59,7 +62,6 @@ export function LoginForm({
       const data = await response.json();
       console.log("Success:", data);
 
-      // Handle successful authentication
       if (onAuthSuccess) {
         onAuthSuccess(data);
       }
@@ -131,7 +133,9 @@ export function LoginForm({
               <Button type="submit" className="w-full">
                 {isSignUp ? "Sign Up" : "Login"}
               </Button>
-              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+              {error && (
+                <div className="text-red-500 text-sm mt-2">{error}</div>
+              )}
             </div>
             <div className="mt-4 text-center text-sm">
               {isSignUp

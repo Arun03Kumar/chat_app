@@ -61,7 +61,19 @@ const items = [
   },
 ];
 
-export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDetails: any, otherUsers: any}) {
+export function AppSidebar({
+  userDetails,
+  otherUsers,
+  setSelectedUser,
+  onlineUsers,
+}: {
+  userDetails: any;
+  otherUsers: any;
+}) {
+  const handleLogout = () => {
+    localStorage.removeItem("jwt");
+    window.location.reload();
+  };
   return (
     <Sidebar>
       <SidebarContent>
@@ -70,12 +82,21 @@ export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDeta
           <SidebarGroupContent>
             <SidebarMenu>
               {otherUsers.map((item) => (
-                <SidebarMenuItem key={item.id} onClick={() => setSelectedUser(item.id)}>
+                <SidebarMenuItem
+                  key={item.id}
+                  onClick={() => setSelectedUser(item.id)}
+                >
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      {/* <item.icon /> */}
+                    <div className="flex items-center space-x-2">
                       <span>{item.username}</span>
-                    </a>
+                      <div
+                        className={`w-2 h-2 rounded-full mt-1 ${
+                          onlineUsers.includes(String(item.id))
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                      />
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -116,7 +137,7 @@ export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDeta
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Username
+                  <User2 /> {userDetails?.user?.username}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -124,13 +145,10 @@ export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDeta
                 side="top"
                 className="w-[--radix-popper-anchor-width]"
               >
-                <DropdownMenuItem>
+                {/* <DropdownMenuItem>
                   <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
+                </DropdownMenuItem> */}
+                <DropdownMenuItem onClick={handleLogout}>
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
