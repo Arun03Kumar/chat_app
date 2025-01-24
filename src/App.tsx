@@ -186,6 +186,7 @@ function App() {
   const [otherUsers, setOtherUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserText, setSelectedUserText] = useState(null);
+  const [conversationNew, setConversationNew] = useState(null);
 
   useEffect(() => {
     // Check for JWT in localStorage and validate it
@@ -226,7 +227,7 @@ function App() {
 
     // Fetch all users except the logged-in user
     fetchOtherUsers(data.jwt, data.user.id);
-  };
+  };  
 
   useEffect(() => {
     if (selectedUser && isLoggedIn && userDetails) {
@@ -239,8 +240,70 @@ function App() {
         console.log(x, selectedUser);
         setSelectedUserText(x[0]);
       });
+      const conv2 = fetchOrCreateConversation(
+        userDetails?.jwt,
+        userDetails?.user?.id,
+        selectedUser
+      );
+      conv2.then((x) => {
+        console.log(x, selectedUser);
+        setConversationNew(x);
+      });
     }
   }, [isLoggedIn, selectedUser, userDetails]);
+
+  const fetchOrCreateConversation = async (jwt, senderId, receiverId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:1337/api/conversations?filters[participants][id][$in]=${senderId}&filters[participants][id][$in]=${receiverId}&populate[participants][populate]=*`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch conversations");
+      }
+  
+      const data = await response.json();
+      let conversation = data.data[0]; // Get the first matching conversation
+  
+      // If no conversation exists, create one
+      if (!conversation) {
+        console.log(`[Frontend] No conversation found. Creating a new one.`);
+        const createResponse = await fetch("http://localhost:1337/api/conversations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify({
+            data: {
+              Title: `Conversation between ${senderId} and ${receiverId}`,
+              participants: [senderId, receiverId],
+            },
+          }),
+        });
+  
+        if (!createResponse.ok) {
+          throw new Error("Failed to create a conversation");
+        }
+  
+        const createData = await createResponse.json();
+        conversation = createData.data; // Use the newly created conversation
+      }
+  
+      console.log(`[Frontend] Conversation fetched or created:`, conversation);
+      return conversation; // Return the conversation object
+    } catch (error) {
+      console.error("Error fetching or creating conversation:", error);
+      return null;
+    }
+  };
+  
 
   const fetchConversationsBetweenUsers = async (
     jwt,
@@ -334,6 +397,7 @@ function App() {
             <Header />
             <ChatCenter
               selectedUserText={selectedUserText}
+              conversationNew={conversationNew}
               sender={userDetails}
               receiver={selectedUser}
             />

@@ -67,7 +67,7 @@
     },
     "conversation": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "manyToMany",
       "target": "api::conversation.conversation",
       "inversedBy": "participants"
     }

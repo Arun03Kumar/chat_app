@@ -427,7 +427,7 @@ export interface ApiConversationConversation
       Schema.Attribute.Private;
     messages: Schema.Attribute.Relation<'oneToMany', 'api::message.message'>;
     participants: Schema.Attribute.Relation<
-      'oneToMany',
+      'manyToMany',
       'plugin::users-permissions.user'
     >;
     publishedAt: Schema.Attribute.DateTime;
@@ -969,7 +969,7 @@ export interface PluginUsersPermissionsUser
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     conversation: Schema.Attribute.Relation<
-      'manyToOne',
+      'manyToMany',
       'api::conversation.conversation'
     >;
     createdAt: Schema.Attribute.DateTime;

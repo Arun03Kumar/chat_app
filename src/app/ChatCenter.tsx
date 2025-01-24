@@ -1,49 +1,75 @@
 import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const ChatCenter = ({ selectedUserText, sender, receiver }) => {
+const ChatCenter = ({ selectedUserText, conversationNew, sender, receiver }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const socket = useRef(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // Initialize Socket.IO
+    console.log(`[Frontend] Initializing Socket.IO for user: ${sender.user.id}`);
     socket.current = io("http://localhost:1337", {
       query: { userId: sender.user.id },
       transports: ["websocket"],
     });
+    
+
+    socket.current.on("connect", () => {
+      console.log(`[Frontend] Socket connected. ID: ${socket.current.id}`);
+    });
+
+    if (conversationNew?.id) {
+      console.log(`[Frontend] Joining conversation room: ${conversationNew.id}`);
+      socket.current.emit("join_conversation", conversationNew.id);
+    }
 
     // Listen for real-time messages
     socket.current.on("receive_message", (data) => {
-      console.log("Received message:", data);
+      console.log(`[Frontend] Received message:`, data);
       if (data.conversationId === selectedUserText?.id) {
+        console.log(`[Frontend] Message belongs to current conversation. Updating UI.`);
         setMessages((prevMessages) => [...prevMessages, data.message]);
+      } else {
+        console.log(`[Frontend] Message does not belong to current conversation.`);
       }
     });
 
+    socket.current.on("message_sent", (data) => {
+      console.log(`[Frontend] Message sent confirmation received:`, data);
+    });
+
+    socket.current.on("disconnect", () => {
+      console.log(`[Frontend] Socket disconnected.`);
+    });
+
+    socket.current.on("connect_error", (err) => {
+    console.error(`[Frontend] Socket connection error:`, err);
+  });
+
     return () => {
-      socket.current.disconnect(); // Cleanup on unmount
+      console.log(`[Frontend] Disconnecting socket.`);
+      socket.current.disconnect();
     };
-  }, [sender.user.id, selectedUserText?.id]);
+  }, [sender.user.id, conversationNew]);
 
   // Update messages when `selectedUserText` changes
   useEffect(() => {
-    if (receiver) {
-      if (selectedUserText?.messages) {
-        setMessages(selectedUserText.messages);
-      } else {
-        setMessages([]); // Clear messages if no conversation exists
-      }
+    console.log(`[Frontend] selectedUserText changed:`, selectedUserText);
+    if (selectedUserText?.messages) {
+      setMessages(selectedUserText.messages);
+      console.log(`[Frontend] Messages updated from selectedUserText.`);
     } else {
-      setMessages([]); // Clear messages if no receiver is selected
+      setMessages([]);
+      console.log(`[Frontend] No messages found for selectedUserText. Clearing messages.`);
     }
-  }, [receiver, selectedUserText]);
+  }, [selectedUserText]);
 
   // Scroll to the latest message
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      console.log(`[Frontend] Scrolling to the latest message.`);
     }
   }, [messages]);
 
@@ -53,7 +79,10 @@ const ChatCenter = ({ selectedUserText, sender, receiver }) => {
         content: input,
         senderId: sender.user.id,
         receiverId: receiver,
+        conversationId: conversationNew?.id,
       };
+
+      console.log(`[Frontend] Sending message:`, messageData);
 
       // Emit the message to the server
       socket.current.emit("send_message", messageData);
@@ -71,6 +100,7 @@ const ChatCenter = ({ selectedUserText, sender, receiver }) => {
           sender: { id: sender.user.id },
         },
       ]);
+      console.log(`[Frontend] Message optimistically added to the UI.`);
 
       setInput("");
     }
