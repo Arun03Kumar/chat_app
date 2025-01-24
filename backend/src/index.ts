@@ -8,13 +8,18 @@ export default {
     const server = http.createServer(strapi.server.app.callback());
     const io = new Server(server, {
       cors: {
-        origin: "*", // Allow all origins for development
+        origin: "*",
         methods: ["GET", "POST"],
       },
     });
 
+    // Handle Socket.IO connections
     io.on('connection', (socket) => {
-      console.log(`Socket connected: ${socket.id}`);
+      const userId = socket.handshake.query.userId;
+      console.log(`Socket connected: ${socket.id} for user: ${userId}`);
+
+      // Add the user to a room identified by their user ID
+      socket.join(userId);
 
       // Handle send_message event
       socket.on('send_message', async (data) => {
@@ -26,10 +31,9 @@ export default {
             'api::conversation.conversation',
             {
               filters: {
-                $and: [
-                  { participants: { id: senderId } },
-                  { participants: { id: receiverId } },
-                ],
+                participants: {
+                  id: { $in: [senderId, receiverId] },
+                },
               },
               populate: ['participants'],
             }
@@ -67,7 +71,9 @@ export default {
             }
           );
 
-          // Step 4: Broadcast the new message to the receiver
+          console.log("Message saved:", newMessage);
+
+          // Step 4: Emit the message to the receiver's room
           io.to(receiverId).emit('receive_message', {
             message: newMessage,
             conversationId: conversation.id,
