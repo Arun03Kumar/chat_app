@@ -419,16 +419,15 @@ export interface ApiConversationConversation
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    isGroup: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::conversation.conversation'
     > &
       Schema.Attribute.Private;
-    messages: Schema.Attribute.Relation<'manyToMany', 'api::message.message'>;
+    messages: Schema.Attribute.Relation<'oneToMany', 'api::message.message'>;
     participants: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::users-permissions.user'
     >;
     publishedAt: Schema.Attribute.DateTime;
@@ -484,8 +483,8 @@ export interface ApiMessageMessage extends Struct.CollectionTypeSchema {
   };
   attributes: {
     Content: Schema.Attribute.Blocks;
-    convs: Schema.Attribute.Relation<
-      'manyToMany',
+    conv: Schema.Attribute.Relation<
+      'manyToOne',
       'api::conversation.conversation'
     >;
     createdAt: Schema.Attribute.DateTime;
@@ -498,8 +497,8 @@ export interface ApiMessageMessage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    senders: Schema.Attribute.Relation<
-      'manyToMany',
+    sender: Schema.Attribute.Relation<
+      'oneToOne',
       'plugin::users-permissions.user'
     >;
     updatedAt: Schema.Attribute.DateTime;
@@ -969,6 +968,10 @@ export interface PluginUsersPermissionsUser
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    conversation: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::conversation.conversation'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -990,16 +993,11 @@ export interface PluginUsersPermissionsUser
       }>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    receivers: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::conversation.conversation'
-    >;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.role'
     >;
-    sends: Schema.Attribute.Relation<'manyToMany', 'api::message.message'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -83,7 +83,7 @@ export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDeta
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Collapsible defaultOpen className="group/collapsible">
+        {/* <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger>
@@ -108,7 +108,7 @@ export function AppSidebar({userDetails, otherUsers, setSelectedUser}: {userDeta
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible>
+        </Collapsible> */}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

@@ -65,17 +65,11 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "receivers": {
+    "conversation": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::conversation.conversation",
-      "mappedBy": "participants"
-    },
-    "sends": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::message.message",
-      "mappedBy": "senders"
+      "inversedBy": "participants"
     }
   }
 }

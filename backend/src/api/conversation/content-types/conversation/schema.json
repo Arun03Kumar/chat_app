@@ -15,20 +15,17 @@
     "Title": {
       "type": "string"
     },
-    "isGroup": {
-      "type": "boolean"
-    },
     "participants": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "oneToMany",
       "target": "plugin::users-permissions.user",
-      "inversedBy": "receivers"
+      "mappedBy": "conversation"
     },
     "messages": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "oneToMany",
       "target": "api::message.message",
-      "mappedBy": "convs"
+      "mappedBy": "conv"
     }
   }
 }

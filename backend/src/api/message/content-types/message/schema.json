@@ -15,15 +15,14 @@
     "Content": {
       "type": "blocks"
     },
-    "senders": {
+    "sender": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "sends"
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
     },
-    "convs": {
+    "conv": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::conversation.conversation",
       "inversedBy": "messages"
     }
